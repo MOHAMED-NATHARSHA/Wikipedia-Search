@@ -1,22 +1,15 @@
-console.log('script loaded');
 let mainContainerEl = document.getElementById('mainContainer');
 let inputEl = document.getElementById('searchInput');
 let searchBtnEl= document.getElementById('searchBtn');
 let outputEl = document.getElementById('output');
+let spinnerEl = document.getElementById('spinner');
 
-
-
-function displayResults(results) {
-    outputEl.textContent = ""; // Clear previous results
-    for(let result of results){ 
-        
-        let title = result.title;
+function eachresultContainer(result) {
+    let title = result.title;
         let snipper = result.snippet;
         let pageId = result.pageid;
         let pageUrl = `https://en.wikipedia.org/?curid=${pageId}`;
-        console.log('title:', title);
-        console.log('snipper:', snipper);
-        console.log('pageId:', pageId);
+        
         
         let searchContainer = document.createElement('div');
         searchContainer.classList.add('output-container');
@@ -40,7 +33,15 @@ function displayResults(results) {
         snippetEl.innerHTML = snipper;
         searchContainer.appendChild(snippetEl);
         searchContainer.appendChild(document.createElement('br'));
+}
 
+function displayResults(results) {
+    outputEl.textContent = ""; // Clear previous results
+    spinnerEl.classList.toggle("spinnerdisplay");
+    for(let result of results){ 
+        
+        
+        eachresultContainer(result);
 
 
     }
@@ -48,6 +49,7 @@ function displayResults(results) {
 } 
 
 function search() {
+    spinnerEl.classList.toggle("spinnerdisplay");
     let InputValue =  inputEl.value;
     inputEl.textContent = ""; // Clear previous input
 
@@ -57,7 +59,7 @@ function search() {
             'Content-Type': 'application/json'
         }
     };
-    let searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${InputValue}&format=json&origin=*&srlimit=10`
+    let searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${InputValue}&format=json&origin=*&srlimit=15`
     console.log('searchUrl:', searchUrl);
     fetch(searchUrl,options)
     
@@ -70,16 +72,37 @@ function search() {
     })
     .then(function(data) {
         let results = data.query.search;
+        if (results.length === 0) {
+            outputEl.textContent = ""; // Clear previous results
+            inputEl.textContent = ""; // Clear previous input
+            alert("No results found");
+            
+            return;
+        }
+        else{
        displayResults(results);
+    }
 
     })
 }
 
 function searchfunction(event){
+   
     let InputValue =  inputEl.value;
+    if (event.key === "Enter" && InputValue === "") {
+        outputEl.textContent = ""; // Clear previous results
+        alert("Please enter a search term");
+       
+        inputEl.textContent = ""; // Clear previous input
+        return;
+        
+    }
     
     if (event.type === "click" && InputValue === "") {
+        outputEl.textContent = ""; // Clear previous results
         alert("Please enter a search term");
+        
+        inputEl.textContent = ""; // Clear previous input
         return;
         
     }
